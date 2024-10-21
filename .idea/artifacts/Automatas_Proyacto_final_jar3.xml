@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Automatas_Proyacto_final:jar3">
+    <output-path>$PROJECT_DIR$/out/artifacts/Automatas_Proyacto_final_jar3</output-path>
+    <root id="archive" name="Automatas_Proyacto_final.jar">
+      <element id="module-output" name="Automatas_Proyacto_final" />
+    </root>
+  </artifact>
+</component>
