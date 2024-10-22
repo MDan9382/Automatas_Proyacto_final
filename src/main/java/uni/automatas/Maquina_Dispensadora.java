@@ -8,6 +8,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import static uni.automatas.DevolverVuelto.monedas;
+import static uni.automatas.DevolverVuelto.imagen;
 
 public class Maquina_Dispensadora {
     private JPanel pnlMain;
@@ -53,42 +55,94 @@ public class Maquina_Dispensadora {
     private JLabel lblPrdK;
     private JLabel lblPrdL;
     private JLabel lblSaldo;
+    private JTextArea textPA;
+    private JTextArea textPB;
+    private JTextArea textPC;
+    private JTextArea textPD;
+    private JTextArea textPE;
+    private JTextArea textPF;
+    private JTextArea textPG;
+    private JTextArea textPH;
+    private JTextArea textPI;
+    private JTextArea textPJ;
+    private JTextArea textPK;
+    private JTextArea textPL;
 
     Mapas mapas = new Mapas();
+
+
+    public void enAbrir (JTextArea text, char op) {
+        text.setText("Codigo: " + op + "\n" + mapas.Nombre(op) + "\nQ" + mapas.Precio(op) + "\nExistencias: " + mapas.Exsitencia(op));
+        text.setFont(text.getFont().deriveFont(text.getFont().getStyle() | Font.BOLD));
+        text.setBackground(Color.DARK_GRAY);
+        text.setEnabled(false);
+    }
+
+    public void abrirLote() {
+        enAbrir(textPA,'A');
+        enAbrir(textPB, 'B');
+        enAbrir(textPC,'C');
+        enAbrir(textPD,'D');
+        enAbrir(textPE,'E');
+        enAbrir(textPF, 'F');
+        enAbrir(textPG,'G');
+        enAbrir(textPH,'H');
+        enAbrir(textPI,'I');
+        enAbrir(textPJ,'J');
+        enAbrir(textPK,'K');
+        enAbrir(textPL,'L');
+    }
+
     String formatoTransaccionFin = "Compra: %s \nPrecio %s \nVuelto total %s \nBilletes de vuelto %s";
     String nombreProducto = "", transaccionStr;
     char op;
     int precioProducto, dineroAcumulado = 0;
 
+    public void pressProd(char op){
+        if (dineroAcumulado < mapas.Precio(op)) {
+            JOptionPane.showMessageDialog(null, "Saldo insuficiente", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        if (mapas.Exsitencia(op) <= 0) {
+            JOptionPane.showMessageDialog(null, "No hay existencias", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        else {
+            nombreProducto = mapas.Nombre(op);
+            precioProducto = mapas.Precio(op);
+            textProductoNombre.setText(nombreProducto);
+            textPrecioProducto.setText(precioProducto + "");
+
+        }
+    }
+
+    public  void pressDin (int n) {
+        dineroAcumulado +=n;
+        textDineroAcumulado.setText(String.valueOf(dineroAcumulado));
+
+        if(dineroAcumulado >= 25) {
+            btnDinero1.setEnabled(false);
+            btnDinero5.setEnabled(false);
+            btnDinero10.setEnabled(false);
+            btnDinero20.setEnabled(false);
+        }
+
+    }
+
+
     public Maquina_Dispensadora() {
+
+
         BtnPrdA.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
 
                 op = 'A';
-                if (dineroAcumulado < mapas.Precio(op)) {
-                    JOptionPane.showMessageDialog(null, "Saldo insuficiente", "Error", JOptionPane.ERROR_MESSAGE);
-                }
-                else {
-                    nombreProducto = mapas.Nombre(op);
-                    precioProducto = mapas.Precio(op);
-                    textProductoNombre.setText(nombreProducto);
-                    textPrecioProducto.setText(precioProducto + "");
-                }
+               pressProd(op);
             }
         });
         btnDinero1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                dineroAcumulado +=1;
-                textDineroAcumulado.setText(String.valueOf(dineroAcumulado));
-
-                if(dineroAcumulado >= 25) {
-                    btnDinero1.setEnabled(false);
-                    btnDinero5.setEnabled(false);
-                    btnDinero10.setEnabled(false);
-                    btnDinero20.setEnabled(false);
-                }
+                pressDin(1);
 
             }
         });
@@ -102,7 +156,21 @@ public class Maquina_Dispensadora {
 
                     dineroAcumulado -= precioProducto;
                     transaccionStr = String.format(formatoTransaccionFin,nombreProducto, precioProducto, dineroAcumulado, Vuelto.mensajeVuelto(dineroAcumulado));
-                    JOptionPane.showMessageDialog(null,transaccionStr,"Factura",JOptionPane.INFORMATION_MESSAGE);
+                    //JOptionPane.showMessageDialog(null,transaccionStr,"Factura",JOptionPane.INFORMATION_MESSAGE);
+
+                    DevolverVuelto devolverVuelto = new DevolverVuelto();
+                    int[] n = Vuelto.calcularVuelto(dineroAcumulado);
+                    for (int i = 0; i<=3; i++){
+                        for ( int j = 0 ; j < n[i]; j++){
+                            imagen = monedas[i];
+                            devolverVuelto.abrirFormulario();
+                        }
+                    }
+                    DevolverProducto devolverProducto = new DevolverProducto(op);
+                    devolverProducto.prod = op;
+                    //System.out.println(devolverProducto.imagen);
+                    devolverProducto.abrirFormulario();
+
                     dineroAcumulado = 0;
                     nombreProducto = "";
                     textDineroAcumulado.setText(String.valueOf(dineroAcumulado));
@@ -114,82 +182,45 @@ public class Maquina_Dispensadora {
                     btnDinero10.setEnabled(true);
                     btnDinero20.setEnabled(true);
 
+                    mapas.MapExsitencias.replace(op, mapas.Exsitencia(op), mapas.Exsitencia(op) -1);
+                    abrirLote();
+
                 }
             }
         });
         btnDinero5.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                dineroAcumulado += 5;
-                textDineroAcumulado.setText(String.valueOf(dineroAcumulado));
 
-                if(dineroAcumulado >= 25) {
-                    btnDinero1.setEnabled(false);
-                    btnDinero5.setEnabled(false);
-                    btnDinero10.setEnabled(false);
-                    btnDinero20.setEnabled(false);
-                }
+                pressDin(5);
 
             }
         });
         btnDinero10.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                dineroAcumulado += 10;
-                textDineroAcumulado.setText(String.valueOf(dineroAcumulado));
 
-                if(dineroAcumulado >= 25) {
-                    btnDinero1.setEnabled(false);
-                    btnDinero5.setEnabled(false);
-                    btnDinero10.setEnabled(false);
-                    btnDinero20.setEnabled(false);
-                }
-
+                pressDin(10);
             }
         });
         btnDinero20.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                dineroAcumulado += 20;
-                textDineroAcumulado.setText(String.valueOf(dineroAcumulado));
-
-                if(dineroAcumulado >= 25) {
-                    btnDinero1.setEnabled(false);
-                    btnDinero5.setEnabled(false);
-                    btnDinero10.setEnabled(false);
-                    btnDinero20.setEnabled(false);
-                }
-
+            pressDin(20);
             }
         });
         BtnPrdB.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 op = 'B';
-                if (dineroAcumulado < mapas.Precio(op)) {
-                    JOptionPane.showMessageDialog(null, "Saldo insuficiente", "Error", JOptionPane.ERROR_MESSAGE);
-                }
-                else {
-                    nombreProducto = mapas.Nombre(op);
-                    precioProducto = mapas.Precio(op);
-                    textProductoNombre.setText(nombreProducto);
-                    textPrecioProducto.setText(precioProducto + "");
-                }
+               pressProd(op);
             }
         });
         BtnPrdC.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 op = 'C';
-                if (dineroAcumulado < mapas.Precio(op)) {
-                    JOptionPane.showMessageDialog(null, "Saldo insuficiente", "Error", JOptionPane.ERROR_MESSAGE);
-                }
-                else {
-                    nombreProducto = mapas.Nombre(op);
-                    precioProducto = mapas.Precio(op);
-                    textProductoNombre.setText(nombreProducto);
-                    textPrecioProducto.setText(precioProducto + "");
-                }
+                pressProd(op);
 
             }
         });
@@ -197,15 +228,7 @@ public class Maquina_Dispensadora {
             @Override
             public void actionPerformed(ActionEvent e) {
                 op = 'D';
-                if (dineroAcumulado < mapas.Precio(op)) {
-                    JOptionPane.showMessageDialog(null, "Saldo insuficiente", "Error", JOptionPane.ERROR_MESSAGE);
-                }
-                else {
-                    nombreProducto = mapas.Nombre(op);
-                    precioProducto = mapas.Precio(op);
-                    textProductoNombre.setText(nombreProducto);
-                    textPrecioProducto.setText(precioProducto + "");
-                }
+                pressProd(op);
             }
         });
         BtnPrdE.addActionListener(new ActionListener()
@@ -213,124 +236,68 @@ public class Maquina_Dispensadora {
             @Override
             public void actionPerformed(ActionEvent e) {
                 op = 'E';
-                //precioProducto = 0;
-                if (dineroAcumulado < mapas.Precio(op)) {
-                    JOptionPane.showMessageDialog(null, "Saldo insuficiente", "Error", JOptionPane.ERROR_MESSAGE);
-                }
-                else {
-                    nombreProducto = mapas.Nombre(op);
-                    precioProducto = mapas.Precio(op);
-                    textProductoNombre.setText(nombreProducto);
-                    textPrecioProducto.setText(precioProducto + "");
-                }
+                pressProd(op);
             }
         });
         BtnPrdF.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 op = 'F';
-                if (dineroAcumulado < mapas.Precio(op)) {
-                    JOptionPane.showMessageDialog(null, "Saldo insuficiente", "Error", JOptionPane.ERROR_MESSAGE);
-                }
-                else {
-                    nombreProducto = mapas.Nombre(op);
-                    precioProducto = mapas.Precio(op);
-                    textProductoNombre.setText(nombreProducto);
-                    textPrecioProducto.setText(precioProducto + "");
-                }
+                pressProd(op);
             }
         });
         BtnPrdG.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 op = 'G';
-                if (dineroAcumulado < mapas.Precio(op)) {
-                    JOptionPane.showMessageDialog(null, "Saldo insuficiente", "Error", JOptionPane.ERROR_MESSAGE);
-                }
-                else {
-                    nombreProducto = mapas.Nombre(op);
-                    precioProducto = mapas.Precio(op);
-                    textProductoNombre.setText(nombreProducto);
-                    textPrecioProducto.setText(precioProducto + "");
-                }
+                pressProd(op);
             }
         });
         BtnPrdH.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 op = 'H';
-                if (dineroAcumulado < mapas.Precio(op)) {
-                    JOptionPane.showMessageDialog(null, "Saldo insuficiente", "Error", JOptionPane.ERROR_MESSAGE);
-                }
-                else {
-                    nombreProducto = mapas.Nombre(op);
-                    precioProducto = mapas.Precio(op);
-                    textProductoNombre.setText(nombreProducto);
-                    textPrecioProducto.setText(precioProducto + "");
-                }
+                pressProd(op);
             }
         });
         BtnPrdI.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 op = 'I';
-                if (dineroAcumulado < mapas.Precio(op)) {
-                    JOptionPane.showMessageDialog(null, "Saldo insuficiente", "Error", JOptionPane.ERROR_MESSAGE);
-                }
-                else {
-                    nombreProducto = mapas.Nombre(op);
-                    precioProducto = mapas.Precio(op);
-                    textProductoNombre.setText(nombreProducto);
-                    textPrecioProducto.setText(precioProducto + "");
-                }
+                pressProd(op);
             }
         });
         BtnPrdJ.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 op = 'J';
-                if (dineroAcumulado < mapas.Precio(op)) {
-                    JOptionPane.showMessageDialog(null, "Saldo insuficiente", "Error", JOptionPane.ERROR_MESSAGE);
-                }
-                else {
-                    nombreProducto = mapas.Nombre(op);
-                    precioProducto = mapas.Precio(op);
-                    textProductoNombre.setText(nombreProducto);
-                    textPrecioProducto.setText(precioProducto + "");
-                }
+                pressProd(op);
             }
         });
         BtnPrdK.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 op = 'K';
-                if (dineroAcumulado < mapas.Precio(op)) {
-                    JOptionPane.showMessageDialog(null, "Saldo insuficiente", "Error", JOptionPane.ERROR_MESSAGE);
-                }
-                else {
-                    nombreProducto = mapas.Nombre(op);
-                    precioProducto = mapas.Precio(op);
-                    textProductoNombre.setText(nombreProducto);
-                    textPrecioProducto.setText(precioProducto + "");
-                }
+                pressProd(op);
             }
         });
         btnPrdL.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 op = 'L';
-                if (dineroAcumulado < mapas.Precio(op)) {
-                    JOptionPane.showMessageDialog(null, "Saldo insuficiente", "Error", JOptionPane.ERROR_MESSAGE);
-                }
-                else {
-                    nombreProducto = mapas.Nombre(op);
-                    precioProducto = mapas.Precio(op);
-                    textProductoNombre.setText(nombreProducto);
-                    textPrecioProducto.setText(precioProducto + "");
-                }
+                pressProd(op);
             }
         });
+
+        abrirLote();
+
+
     }
+//
+//    public void mostarProd(char n) {
+//        String prod =
+//    }
+
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("Maquina_Dispensadora");
@@ -338,8 +305,6 @@ public class Maquina_Dispensadora {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
-
-
 
 
     }
@@ -350,6 +315,8 @@ public class Maquina_Dispensadora {
         lblPrdAImg = new JLabel();
         ImageIcon imagenA = new ImageIcon(new ImageIcon("Imagenes/PrdAImg.PNG").getImage().getScaledInstance(90,50, Image.SCALE_SMOOTH));
         lblPrdAImg.setIcon(imagenA);
+
+
 
         lblPrdB = new JLabel();
         ImageIcon imagenB = new ImageIcon(new ImageIcon("Imagenes/PrdBImg.PNG").getImage().getScaledInstance(90,50, Image.SCALE_SMOOTH));
@@ -395,5 +362,24 @@ public class Maquina_Dispensadora {
         ImageIcon imagenL = new ImageIcon(new ImageIcon("Imagenes/PrdLImg.jpg").getImage().getScaledInstance(110,80, Image.SCALE_SMOOTH));
         lblPrdL.setIcon(imagenL);
 
+        btnDinero1 = new JButton();
+        ImageIcon imagenDin1 = new ImageIcon(new ImageIcon("Imagenes/1q.png").getImage().getScaledInstance(40,40, Image.SCALE_SMOOTH));
+        btnDinero1.setIcon(imagenDin1);
+
+        btnDinero5 = new JButton();
+        ImageIcon imagenDin5 = new ImageIcon(new ImageIcon("Imagenes/5q.jpg").getImage().getScaledInstance(100,40, Image.SCALE_SMOOTH));
+        btnDinero5.setIcon(imagenDin5);
+
+        btnDinero10 = new JButton();
+        ImageIcon imagenDin10 = new ImageIcon(new ImageIcon("Imagenes/10q.jpg").getImage().getScaledInstance(100,40, Image.SCALE_SMOOTH));
+        btnDinero10.setIcon(imagenDin10);
+
+        btnDinero20 = new JButton();
+        ImageIcon imagenDin20 = new ImageIcon(new ImageIcon("Imagenes/20q.jpg").getImage().getScaledInstance(100,40, Image.SCALE_SMOOTH));
+        btnDinero20.setIcon(imagenDin20);
+
     }
+
+
+
 }

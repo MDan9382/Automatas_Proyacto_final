@@ -1,5 +1,9 @@
 package uni.automatas.Funciones;
 
+import uni.automatas.DevolverVuelto;
+
+
+
 public class Vuelto {
 
     public static int[] calcularVuelto(int n) {
@@ -25,7 +29,6 @@ public class Vuelto {
         int[] n = calcularVuelto(x);
         String formato = "\n %d billetes de 20\n %d billetes de 10\n %d billetes de 5\n %d monedas de quetzal";
         String mensaje= String.format(formato, n[0], n[1], n[2], n[3]);
-
 
 
         return mensaje;

@@ -2,6 +2,7 @@ package uni.automatas.Funciones;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 public class Mapas {
 
@@ -42,9 +43,28 @@ public class Mapas {
         MapNombres.put('L',"Muffin");
     }
 
+    public  Map<Character,Integer> MapExsitencias = new HashMap<>();
+    Random rnd = new Random();
+
+    public  void LlenarExsitencias() {
+        MapExsitencias.put('A',rnd.nextInt(1,10));
+        MapExsitencias.put('B',rnd.nextInt(1,10));
+        MapExsitencias.put('C',rnd.nextInt(1,10));
+        MapExsitencias.put('D',rnd.nextInt(1,10));
+        MapExsitencias.put('E',rnd.nextInt(1,10));
+        MapExsitencias.put('F',rnd.nextInt(1,10));
+        MapExsitencias.put('G',rnd.nextInt(1,10));
+        MapExsitencias.put('H',rnd.nextInt(1,10));
+        MapExsitencias.put('I',rnd.nextInt(1,10));
+        MapExsitencias.put('J',rnd.nextInt(1,10));
+        MapExsitencias.put('K',rnd.nextInt(1,10));
+        MapExsitencias.put('L',2);
+    }
+
     public void Llenartodo() {
         LlenarPrecios();
         LlenarNombres();
+        LlenarExsitencias();
     }
 
     public String Nombre(char c) {
@@ -53,6 +73,10 @@ public class Mapas {
 
     public int Precio(char c) {
         return MapPrecios.get(c);
+    }
+
+    public int Exsitencia(char c) {
+        return MapExsitencias.get(c);
     }
 
     public Mapas() {
